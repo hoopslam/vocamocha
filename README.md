@@ -8,5 +8,5 @@ Voca Mocha is a cross-platform mobile app built with React Native.
 
 ## Future Planned Updates
 
--Push Notification Vocab Study Reminder
--Quizzes
+-   Push Notification Vocab Study Reminder
+-   Quizzes
