@@ -13,6 +13,7 @@ const WordItem = ({ word, onDelete }: Props) => {
             <View style={styles.wordContainer}>
                 <Pressable
                     android_ripple={{ color: `#210644` }}
+                    //TODO: add translation reveal
                     onPress={() => console.log(`pressed`)}
                     style={({ pressed }) => pressed && styles.pressedItem} //IOS ripple alt
                 >
@@ -37,7 +38,7 @@ export default WordItem;
 const styles = StyleSheet.create({
     container: {
         margin: 8,
-        borderRadius: 8,
+        borderRadius: theme.borderRadius,
         backgroundColor: theme.gray,
         flexDirection: `row`,
     },
@@ -52,6 +53,7 @@ const styles = StyleSheet.create({
         opacity: 0.5,
     },
     deleteContainer: {
+        flex: 1,
         backgroundColor: theme.light,
         padding: 14,
         justifyContent: `center`,
