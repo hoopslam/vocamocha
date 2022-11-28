@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Button, TextInput, View, StyleSheet, Modal } from 'react-native';
+import { TextInput, View, StyleSheet, Modal } from 'react-native';
 import { Word } from '../types/types';
 import 'react-native-get-random-values'; //keep before uuid import https://github.com/uuidjs/uuid#getrandomvalues-not-supported
 import { v4 } from 'uuid';
+import theme from '../theme';
+import MochaButton from './MochaButton';
 
 interface Props {
     words: Word[];
@@ -40,8 +42,8 @@ const AddWordModal = ({ addWord, closeModal, isVisible }: Props) => {
                     style={styles.textInput}
                 />
                 <View style={styles.buttonContainer}>
-                    <Button
-                        title='Add Word'
+                    <MochaButton
+                        text='Add Word'
                         onPress={() => {
                             addWord({
                                 id: v4(),
@@ -52,8 +54,8 @@ const AddWordModal = ({ addWord, closeModal, isVisible }: Props) => {
                             closeModal();
                         }}
                     />
-                    <Button
-                        title='Cancel'
+                    <MochaButton
+                        text='Cancel'
                         onPress={() => {
                             clearInput();
                             closeModal();
@@ -72,19 +74,20 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: `center`,
         alignItems: `center`,
-        marginBottom: 24,
-        borderBottomWidth: 1,
-        borderBottomColor: `#fff`,
+        backgroundColor: theme.main,
     },
     textInput: {
-        backgroundColor: `#fff`,
+        backgroundColor: theme.gray,
         width: `70%`,
         padding: 16,
         margin: 8,
-        borderRadius: 8,
+        borderRadius: theme.borderRadius,
         color: `#000`,
     },
     buttonContainer: {
+        marginTop: 20,
+        width: `70%`,
+        justifyContent: `space-around`,
         flexDirection: `row`,
     },
 });

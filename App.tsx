@@ -46,7 +46,6 @@ export default function App() {
                 const jsonValue = await AsyncStorage.getItem(LOCAL_STORAGE_KEY);
                 if (jsonValue !== null) {
                     setWords(JSON.parse(jsonValue));
-                    console.log(`fetched local storage`);
                 }
             } catch (e) {
                 console.error(e);
