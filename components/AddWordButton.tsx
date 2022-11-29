@@ -11,7 +11,12 @@ const AddWordButton = ({ setModalVisible }: Props) => {
             onPress={() => setModalVisible(true)}
             style={styles.addWordContainer}
         >
-            <Text style={styles.addWord}>+</Text>
+            <Text
+                adjustsFontSizeToFit
+                style={styles.addWord}
+            >
+                +
+            </Text>
         </Pressable>
     );
 };
@@ -20,9 +25,6 @@ export default AddWordButton;
 
 const styles = StyleSheet.create({
     addWordContainer: {
-        position: `absolute`,
-        bottom: 60,
-        right: 30,
         backgroundColor: theme.gray,
         width: 60,
         height: 60,
@@ -31,7 +33,8 @@ const styles = StyleSheet.create({
         justifyContent: `center`,
     },
     addWord: {
-        fontSize: 30,
+        fontSize: 40,
+        marginBottom: 5,
         color: theme.dark,
     },
 });
