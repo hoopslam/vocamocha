@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TextInput, View, StyleSheet, Modal } from 'react-native';
+import { TextInput, View, StyleSheet, Modal, Alert } from 'react-native';
 import { Word } from '../types/types';
 import 'react-native-get-random-values'; //keep before uuid import https://github.com/uuidjs/uuid#getrandomvalues-not-supported
 import { v4 } from 'uuid';
@@ -20,6 +20,22 @@ const AddWordModal = ({ addWord, closeModal, isVisible }: Props) => {
     const clearInput = () => {
         setNewWord(``);
         setMeaning(``);
+    };
+
+    const onSubmitHandler = () => {
+        if (!newWord || !meaning) {
+            Alert.alert(``, `Please fill in both fields`, [{ text: `Ok` }], {
+                cancelable: true, //android only
+            });
+            return;
+        }
+        addWord({
+            id: v4(),
+            text: newWord,
+            meaning,
+        });
+        clearInput();
+        closeModal();
     };
 
     return (
@@ -44,15 +60,7 @@ const AddWordModal = ({ addWord, closeModal, isVisible }: Props) => {
                 <View style={styles.buttonContainer}>
                     <MochaButton
                         text='Add Word'
-                        onPress={() => {
-                            addWord({
-                                id: v4(),
-                                text: newWord,
-                                meaning,
-                            });
-                            clearInput();
-                            closeModal();
-                        }}
+                        onPress={onSubmitHandler}
                     />
                     <MochaButton
                         text='Cancel'
