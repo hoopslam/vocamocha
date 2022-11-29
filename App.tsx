@@ -69,10 +69,12 @@ export default function App() {
                 <Text style={styles.title}>Voca Mocha</Text>
             </View>
 
-            <VocabList
-                words={words}
-                onDeleteHandler={onDeleteHandler}
-            />
+            <View style={styles.listContainer}>
+                <VocabList
+                    words={words}
+                    onDeleteHandler={onDeleteHandler}
+                />
+            </View>
             <AddWordButton setModalVisible={setModalVisible} />
         </View>
     );
@@ -106,5 +108,10 @@ const styles = StyleSheet.create({
         backgroundColor: theme.light,
         alignItems: `center`,
         justifyContent: `center`,
+    },
+    listContainer: {
+        alignItems: `center`,
+        width: `100%`,
+        height: `80%`,
     },
 });
