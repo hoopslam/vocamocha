@@ -35,6 +35,6 @@ const styles = StyleSheet.create({
     addWord: {
         fontSize: 40,
         marginBottom: 5,
-        color: theme.dark,
+        color: theme.green,
     },
 });

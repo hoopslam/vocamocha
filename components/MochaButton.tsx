@@ -26,9 +26,9 @@ const styles = StyleSheet.create({
         alignItems: `center`,
         padding: 20,
         borderRadius: theme.borderRadius,
-        backgroundColor: theme.green,
+        backgroundColor: theme.dark,
     },
     text: {
-        color: theme.white,
+        color: theme.gray,
     },
 });

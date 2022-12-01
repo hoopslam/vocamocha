@@ -108,13 +108,13 @@ const styles = StyleSheet.create({
     },
     deleteContainer: {
         flex: 1,
-        backgroundColor: theme.light,
+        backgroundColor: theme.dark,
         paddingHorizontal: 20,
         borderBottomRightRadius: 8,
         borderTopRightRadius: 8,
     },
     delete: {
-        color: theme.dark,
+        color: theme.gray,
         fontSize: 30,
     },
 });

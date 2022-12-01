@@ -83,8 +83,8 @@ export default function App() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        marginTop: 50,
-        backgroundColor: theme.main,
+        marginTop: 20,
+        backgroundColor: theme.black,
         alignItems: 'center',
         justifyContent: 'flex-start',
     },
