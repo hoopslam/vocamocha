@@ -1,7 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
 import { useState, useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import Header from './components/Header';
 import AddWordModal from './components/AddWordModal';
+import SettingsModal from './components/SettingsModal';
 import theme from './theme';
 import VocabList from './components/VocabList';
 import AddWordButton from './components/AddWordButton';
@@ -12,6 +14,7 @@ import { LOCAL_STORAGE_KEY } from './constants';
 export default function App() {
     const [words, setWords] = useState<Word[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
+    const [settings, setSettings] = useState(false);
 
     const addWordHandler = async (newWord: Word) => {
         try {
@@ -65,9 +68,16 @@ export default function App() {
                     closeModal={() => setModalVisible(false)}
                 />
             )}
-            <View style={styles.titleContainer}>
-                <Text style={styles.title}>Voca Mocha</Text>
-            </View>
+            {settings && (
+                <SettingsModal
+                    isVisible={settings}
+                    closeModal={() => setSettings(false)}
+                />
+            )}
+            <Header
+                onPress={() => setSettings(true)}
+                onCloseSettings={() => setSettings(false)}
+            />
 
             <View style={styles.listContainer}>
                 <VocabList
@@ -87,17 +97,6 @@ const styles = StyleSheet.create({
         backgroundColor: theme.black,
         alignItems: 'center',
         justifyContent: 'flex-start',
-    },
-    titleContainer: {
-        backgroundColor: theme.green,
-        width: `100%`,
-        padding: 20,
-        flexDirection: `row`,
-        justifyContent: `space-evenly`,
-    },
-    title: {
-        color: theme.white,
-        fontSize: 20,
     },
     modalContainer: {
         position: `absolute`,
