@@ -8,8 +8,7 @@ import theme from './theme';
 import VocabList from './components/VocabList';
 import AddWordButton from './components/AddWordButton';
 import { Word } from './types/types';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LOCAL_STORAGE_KEY } from './constants';
+import { getLocalData, setWordsLocally } from './utils/localStorage';
 
 export default function App() {
     const [words, setWords] = useState<Word[]>([]);
@@ -17,44 +16,27 @@ export default function App() {
     const [settings, setSettings] = useState(false);
 
     const addWordHandler = async (newWord: Word) => {
-        try {
-            const jsonValue = JSON.stringify(
-                words.length ? [...words, newWord] : [newWord]
-            );
-            await AsyncStorage.setItem(LOCAL_STORAGE_KEY, jsonValue);
-            setWords((current) => [...current, newWord]);
-        } catch (e) {
-            console.error(e);
-        }
+        const newWords = [...words, newWord];
+        setWordsLocally(newWords);
+        setWords(newWords);
     };
 
     const onDeleteHandler = async (id: string) => {
         if (!words.length) return;
         const filteredWords = words.filter((word) => word.id !== id);
 
-        try {
-            await AsyncStorage.setItem(
-                LOCAL_STORAGE_KEY,
-                JSON.stringify(filteredWords)
-            );
-            setWords(filteredWords);
-        } catch (e) {
-            console.error(e);
-        }
+        setWordsLocally(filteredWords);
+        setWords(filteredWords);
     };
 
     useEffect(() => {
-        const getLocalData = async () => {
-            try {
-                const jsonValue = await AsyncStorage.getItem(LOCAL_STORAGE_KEY);
-                if (jsonValue !== null) {
-                    setWords(JSON.parse(jsonValue));
-                }
-            } catch (e) {
-                console.error(e);
+        const loadLocalData = async () => {
+            const localData = await getLocalData();
+            if (localData?.words?.length) {
+                setWords(localData.words);
             }
         };
-        getLocalData();
+        loadLocalData();
     }, []);
 
     return (
@@ -72,6 +54,9 @@ export default function App() {
                 <SettingsModal
                     isVisible={settings}
                     closeModal={() => setSettings(false)}
+                    randomWord={
+                        words[Math.floor(Math.random() * words.length)].text
+                    }
                 />
             )}
             <Header

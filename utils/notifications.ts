@@ -1,13 +1,14 @@
 import * as Notifications from 'expo-notifications';
 
 export const setNotifications = async (
-    hour: number = 16,
-    minute: number = 11
+    hour: number = 12,
+    minute: number = 0,
+    word: string
 ) => {
     const notificationId = await Notifications.scheduleNotificationAsync({
         content: {
-            title: 'Study Reminder',
-            body: 'Testing 123',
+            title: 'Remember this word?',
+            body: word,
         },
         trigger: {
             hour,

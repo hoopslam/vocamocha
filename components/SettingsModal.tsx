@@ -3,17 +3,21 @@ import { useState } from 'react';
 import theme from '../theme';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { setNotifications } from '../utils/notifications';
+import { cancelNotification, setNotifications } from '../utils/notifications';
 
 interface Props {
     isVisible: boolean;
+    randomWord: string;
     closeModal: () => void;
 }
 
-const SettingsModal = ({ isVisible, closeModal }: Props) => {
+const SettingsModal = ({ isVisible, randomWord, closeModal }: Props) => {
     const [isNotifications, setIsNotifications] = useState(false); //TODO: save to local storage
     const [showTimePicker, setShowTimePicker] = useState(true);
     const [time, setTime] = useState(new Date(1598051730000));
+
+    const hour = 12; //TODO: Set hour/min later
+    const minute = 0;
 
     const handleNotificationTime = (event: any, selectedTime: any) => {
         console.log(`setTime`);
@@ -21,6 +25,16 @@ const SettingsModal = ({ isVisible, closeModal }: Props) => {
         setShowTimePicker(false);
         setTime(currentTime);
     };
+
+    // const handleNotificationToggle = () => {
+    //     if (isNotifications) {
+    //         cancelNotification() // notificationId from local storage
+    //         setIsNotifications(false)
+    //         return;
+    //     }
+    //     setIsNotifications(true)
+    //     const notificationId = setNotifications(hour, minute, randomWord)
+    // }
 
     return (
         <Modal
@@ -39,7 +53,7 @@ const SettingsModal = ({ isVisible, closeModal }: Props) => {
                 <Pressable
                     onPress={() => {
                         setIsNotifications((current) => !current);
-                        setNotifications(); //TODO: send hour and minute
+                        setNotifications(hour, minute, randomWord); //TODO: send hour and minute
                     }}
                     style={styles.row}
                 >
