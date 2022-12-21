@@ -1,24 +1,35 @@
 import * as Notifications from 'expo-notifications';
 
-export const setNotifications = async (
-    hour: number = 12,
-    minute: number = 0,
-    word: string
-) => {
+export const setNotifications = async (date: Date, word: string | null) => {
+    const trigger = {
+        date,
+        repeat: `day`,
+    };
     const notificationId = await Notifications.scheduleNotificationAsync({
         content: {
-            title: 'Remember this word?',
-            body: word,
+            title: word
+                ? `How about learning a new word today?`
+                : `Remember this word?`,
+            body: word ? word : ``,
         },
-        trigger: {
-            hour,
-            minute,
-            repeats: true,
-        },
+        trigger,
     });
+    console.log(notificationId);
     return notificationId;
 };
 
 export const cancelNotification = async (notificationId: string) => {
-    await Notifications.cancelScheduledNotificationAsync(notificationId);
+    try {
+        await Notifications.cancelScheduledNotificationAsync(notificationId);
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+export const cancelAllNotifications = async () => {
+    try {
+        await Notifications.cancelAllScheduledNotificationsAsync();
+    } catch (e) {
+        console.error(e);
+    }
 };

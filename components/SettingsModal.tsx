@@ -1,40 +1,83 @@
-import { Modal, View, Text, StyleSheet, Pressable } from 'react-native';
+import {
+    Modal,
+    View,
+    Text,
+    Alert,
+    StyleSheet,
+    Pressable,
+    Platform,
+} from 'react-native';
 import { useState } from 'react';
 import theme from '../theme';
 import { Ionicons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { cancelNotification, setNotifications } from '../utils/notifications';
+import DateTimePicker, {
+    DateTimePickerEvent,
+} from '@react-native-community/datetimepicker';
+import {
+    cancelAllNotifications,
+    cancelNotification,
+    setNotifications,
+} from '../utils/notifications';
+import { getLocalData, setNotificationLocally } from '../utils/localStorage';
 
 interface Props {
     isVisible: boolean;
-    randomWord: string;
+    randomWord: string | null;
+    notificationId?: string;
+    notificationTime?: Date;
     closeModal: () => void;
 }
 
-const SettingsModal = ({ isVisible, randomWord, closeModal }: Props) => {
-    const [isNotifications, setIsNotifications] = useState(false); //TODO: save to local storage
-    const [showTimePicker, setShowTimePicker] = useState(true);
-    const [time, setTime] = useState(new Date(1598051730000));
+const SettingsModal = ({
+    isVisible,
+    randomWord,
+    notificationId,
+    notificationTime,
+    closeModal,
+}: Props) => {
+    const [isNotifications, setIsNotifications] = useState(
+        Boolean(notificationId)
+    );
+    const [showTimePicker, setShowTimePicker] = useState(false);
+    const [time, setTime] = useState(notificationTime ?? new Date());
 
-    const hour = 12; //TODO: Set hour/min later
-    const minute = 0;
-
-    const handleNotificationTime = (event: any, selectedTime: any) => {
-        console.log(`setTime`);
-        const currentTime = selectedTime;
+    const onNotificationTimeChange = (
+        event: DateTimePickerEvent,
+        selectedTime: Date
+    ) => {
         setShowTimePicker(false);
-        setTime(currentTime);
+        setTime(selectedTime);
     };
 
-    // const handleNotificationToggle = () => {
-    //     if (isNotifications) {
-    //         cancelNotification() // notificationId from local storage
-    //         setIsNotifications(false)
-    //         return;
-    //     }
-    //     setIsNotifications(true)
-    //     const notificationId = setNotifications(hour, minute, randomWord)
-    // }
+    const enableNotifications = async (date: Date) => {
+        const notificationId = await setNotifications(date, randomWord);
+        setNotificationLocally(notificationId, date);
+        setIsNotifications(true);
+        Alert.alert(
+            `Notification Set`,
+            `Notification set to ${date.toLocaleTimeString()}`
+        );
+    };
+
+    const disableNotifications = async () => {
+        if (notificationId) {
+            try {
+                cancelNotification(notificationId);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        try {
+            cancelAllNotifications();
+            setIsNotifications(false);
+            Alert.alert(
+                `Notificadtions Cancelled`,
+                `All notifications have been cancelled`
+            );
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
     return (
         <Modal
@@ -51,10 +94,12 @@ const SettingsModal = ({ isVisible, randomWord, closeModal }: Props) => {
                     style={styles.closeIcon}
                 />
                 <Pressable
-                    onPress={() => {
-                        setIsNotifications((current) => !current);
-                        setNotifications(hour, minute, randomWord); //TODO: send hour and minute
-                    }}
+                    onPress={() =>
+                        //TODO: Put in a check to see if notification time is set.  If not, do something
+                        isNotifications
+                            ? disableNotifications()
+                            : enableNotifications(time)
+                    }
                     style={styles.row}
                 >
                     <Ionicons
@@ -77,16 +122,20 @@ const SettingsModal = ({ isVisible, randomWord, closeModal }: Props) => {
                         setShowTimePicker(true);
                     }}
                 >
-                    <Text style={styles.text}>Set daily reminder time</Text>
+                    <Text style={styles.text}>
+                        {notificationTime
+                            ? `Notification scheduled daily at ${notificationTime.toLocaleTimeString()}`
+                            : `Select a daily study reminder time`}
+                    </Text>
                 </Pressable>
                 {showTimePicker && (
                     <DateTimePicker
                         testID='dateTimePicker'
                         value={time}
                         mode={`time`}
-                        is24Hour={true}
-                        onChange={handleNotificationTime}
+                        onChange={onNotificationTimeChange}
                         style={styles.timePicker}
+                        display={Platform.OS === `ios` ? `spinner` : `clock`}
                     />
                 )}
             </View>
@@ -124,9 +173,6 @@ const styles = StyleSheet.create({
     timePicker: {
         flex: 1,
         width: `100%`,
-        textAlign: `start`,
-        justifyContent: `center`,
-        alignItems: `center`,
-        backgroundColor: theme.gray,
+        backgroundColor: theme.white,
     },
 });

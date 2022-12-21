@@ -1,9 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Word } from '../types/types';
 
-interface LocalDataObject {
+export interface LocalDataObject {
     words?: Word[];
     notificationId?: string;
+    notificationTime: Date;
 }
 const LOCAL_STORAGE_KEY = `VOCA_MOCHA_DATA`;
 
@@ -32,7 +33,10 @@ export const setWordsLocally = async (words: Word[]) => {
     }
 };
 
-export const setNotificationIdLocally = async (notificationId: string) => {
+export const setNotificationLocally = async (
+    notificationId: string,
+    date: Date
+) => {
     try {
         const localJSON = await AsyncStorage.getItem(LOCAL_STORAGE_KEY);
         const localData = JSON.parse(localJSON ? localJSON : ``);
@@ -41,6 +45,7 @@ export const setNotificationIdLocally = async (notificationId: string) => {
             JSON.stringify({
                 ...localData,
                 notificationId,
+                notificationTime: date,
             })
         );
     } catch (e) {

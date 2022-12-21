@@ -8,12 +8,17 @@ import theme from './theme';
 import VocabList from './components/VocabList';
 import AddWordButton from './components/AddWordButton';
 import { Word } from './types/types';
-import { getLocalData, setWordsLocally } from './utils/localStorage';
+import {
+    getLocalData,
+    LocalDataObject,
+    setWordsLocally,
+} from './utils/localStorage';
 
 export default function App() {
     const [words, setWords] = useState<Word[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [settings, setSettings] = useState(false);
+    const [localData, setLocalData] = useState<LocalDataObject>();
 
     const addWordHandler = async (newWord: Word) => {
         const newWords = [...words, newWord];
@@ -32,6 +37,9 @@ export default function App() {
     useEffect(() => {
         const loadLocalData = async () => {
             const localData = await getLocalData();
+            if (localData) {
+                setLocalData(localData);
+            }
             if (localData?.words?.length) {
                 setWords(localData.words);
             }
@@ -55,8 +63,13 @@ export default function App() {
                     isVisible={settings}
                     closeModal={() => setSettings(false)}
                     randomWord={
-                        words[Math.floor(Math.random() * words.length)].text
+                        words.length
+                            ? words[Math.floor(Math.random() * words.length)]
+                                  .text
+                            : null
                     }
+                    notificationId={localData?.notificationId}
+                    notificationTime={localData?.notificationTime}
                 />
             )}
             <Header
