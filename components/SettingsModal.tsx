@@ -45,6 +45,13 @@ const SettingsModal = ({ isVisible, closeModal }: Props) => {
     };
     console.log(selectedTime);
 
+    const parseMinutes = (minutes: number) => {
+        if (minutes < 10) {
+            return `0${minutes}`;
+        }
+        return `${minutes}`;
+    };
+
     const onSaveSettings = async () => {
         if (!isNotifications) {
             cancelAllNotifications();
@@ -64,7 +71,9 @@ const SettingsModal = ({ isVisible, closeModal }: Props) => {
             setNotificationLocally(newNotificationId, selectedTime);
             Alert.alert(
                 `Notification Set`,
-                `Notification set to ${selectedTime.getHours()}:${selectedTime.getMinutes()}`
+                `Notification set to ${selectedTime.getHours()}:${parseMinutes(
+                    selectedTime.getMinutes()
+                )}`
             );
         }
     };
@@ -134,7 +143,9 @@ const SettingsModal = ({ isVisible, closeModal }: Props) => {
                             />
                             <Text style={styles.text}>
                                 {selectedTime
-                                    ? `Reminder scheduled for ${selectedTime.getHours()}:${selectedTime.getMinutes()}`
+                                    ? `Reminder scheduled for ${selectedTime.getHours()}:${parseMinutes(
+                                          selectedTime.getMinutes()
+                                      )}`
                                     : `Schedule Study Reminder`}
                             </Text>
                         </Pressable>
