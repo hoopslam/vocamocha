@@ -7,77 +7,82 @@ import {
     Pressable,
     Platform,
 } from 'react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import theme from '../theme';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, AntDesign } from '@expo/vector-icons';
 import DateTimePicker, {
     DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
 import {
     cancelAllNotifications,
-    cancelNotification,
     setNotifications,
 } from '../utils/notifications';
-import { getLocalData, setNotificationLocally } from '../utils/localStorage';
+import {
+    createDateObject,
+    deleteLocalNotification,
+    getLocalData,
+    setNotificationLocally,
+} from '../utils/localStorage';
 
 interface Props {
     isVisible: boolean;
-    randomWord: string | null;
-    notificationId?: string;
-    notificationTime?: Date;
     closeModal: () => void;
 }
 
-const SettingsModal = ({
-    isVisible,
-    randomWord,
-    notificationId,
-    notificationTime,
-    closeModal,
-}: Props) => {
-    const [isNotifications, setIsNotifications] = useState(
-        Boolean(notificationId)
-    );
+const SettingsModal = ({ isVisible, closeModal }: Props) => {
+    const [isNotifications, setIsNotifications] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
-    const [time, setTime] = useState(notificationTime ?? new Date());
+    const [selectedTime, setSelectedTime] = useState(new Date());
 
     const onNotificationTimeChange = (
         event: DateTimePickerEvent,
-        selectedTime: Date
+        selectedDate?: Date
     ) => {
-        setShowTimePicker(false);
-        setTime(selectedTime);
-    };
-
-    const enableNotifications = async (date: Date) => {
-        const notificationId = await setNotifications(date, randomWord);
-        setNotificationLocally(notificationId, date);
-        setIsNotifications(true);
-        Alert.alert(
-            `Notification Set`,
-            `Notification set to ${date.toLocaleTimeString()}`
-        );
-    };
-
-    const disableNotifications = async () => {
-        if (notificationId) {
-            try {
-                cancelNotification(notificationId);
-            } catch (e) {
-                console.error(e);
-            }
+        if (selectedDate) {
+            setSelectedTime(selectedDate);
         }
-        try {
+        setShowTimePicker(false);
+    };
+    console.log(selectedTime);
+
+    const onSaveSettings = async () => {
+        if (!isNotifications) {
             cancelAllNotifications();
-            setIsNotifications(false);
+            deleteLocalNotification();
             Alert.alert(
-                `Notificadtions Cancelled`,
+                `Notifications cancelled`,
                 `All notifications have been cancelled`
             );
-        } catch (e) {
-            console.error(e);
+            return;
+        }
+        if (!selectedTime) {
+            Alert.alert(`Please select a notification time`);
+            return;
+        }
+        const newNotificationId = await setNotifications(selectedTime);
+        if (newNotificationId) {
+            setNotificationLocally(newNotificationId, selectedTime);
+            Alert.alert(
+                `Notification Set`,
+                `Notification set to ${selectedTime.getHours()}:${selectedTime.getMinutes()}`
+            );
         }
     };
+
+    useEffect(() => {
+        const loadLocalNotifications = async () => {
+            const localData = await getLocalData();
+            console.log(`test: ${localData?.notification}`);
+            if (localData?.notification) {
+                let newDateObject = new Date();
+                newDateObject.setHours(localData.notification.hour);
+                newDateObject.setMinutes(localData.notification.minute);
+                setIsNotifications(true);
+                setSelectedTime(newDateObject);
+            }
+        };
+        loadLocalNotifications();
+    }, []);
 
     return (
         <Modal
@@ -95,49 +100,69 @@ const SettingsModal = ({
                 />
                 <Pressable
                     onPress={() =>
-                        //TODO: Put in a check to see if notification time is set.  If not, do something
                         isNotifications
-                            ? disableNotifications()
-                            : enableNotifications(time)
+                            ? setIsNotifications(false)
+                            : setIsNotifications(true)
                     }
                     style={styles.row}
                 >
                     <Ionicons
                         name={
                             isNotifications
-                                ? `notifications`
-                                : `notifications-off`
+                                ? `notifications-off`
+                                : `notifications`
                         }
                         size={24}
                         color='white'
                     />
                     <Text style={styles.text}>
-                        Turn study reminders {isNotifications ? `off` : `on`}
+                        Turn notifications {isNotifications ? `off` : `on`}
                     </Text>
                 </Pressable>
+                {isNotifications && (
+                    <>
+                        <Pressable
+                            style={styles.row}
+                            onPress={() => {
+                                setShowTimePicker(true);
+                            }}
+                        >
+                            <AntDesign
+                                name={`clockcircleo`}
+                                size={24}
+                                color='white'
+                            />
+                            <Text style={styles.text}>
+                                {selectedTime
+                                    ? `Reminder scheduled for ${selectedTime.getHours()}:${selectedTime.getMinutes()}`
+                                    : `Schedule Study Reminder`}
+                            </Text>
+                        </Pressable>
+                        {showTimePicker && (
+                            <DateTimePicker
+                                is24Hour
+                                testID='dateTimePicker'
+                                value={selectedTime}
+                                mode={`time`}
+                                onChange={onNotificationTimeChange}
+                                style={styles.timePicker}
+                                display={
+                                    Platform.OS === `ios` ? `spinner` : `clock`
+                                }
+                            />
+                        )}
+                    </>
+                )}
                 <Pressable
-                    style={styles.row}
+                    style={[styles.row, styles.buttonContainer]}
                     onPress={() => {
-                        console.log(`pressed`);
-                        setShowTimePicker(true);
+                        onSaveSettings();
                     }}
                 >
-                    <Text style={styles.text}>
-                        {notificationTime
-                            ? `Notification scheduled daily at ${notificationTime.toLocaleTimeString()}`
-                            : `Select a daily study reminder time`}
-                    </Text>
+                    <View style={styles.saveButton}>
+                        <Text>Save Settings</Text>
+                    </View>
                 </Pressable>
-                {showTimePicker && (
-                    <DateTimePicker
-                        testID='dateTimePicker'
-                        value={time}
-                        mode={`time`}
-                        onChange={onNotificationTimeChange}
-                        style={styles.timePicker}
-                        display={Platform.OS === `ios` ? `spinner` : `clock`}
-                    />
-                )}
             </View>
         </Modal>
     );
@@ -149,8 +174,7 @@ const styles = StyleSheet.create({
     settingsContainer: {
         paddingTop: 100,
         flex: 1,
-        justifyContent: `flex-start`,
-        alignItems: `flex-start`,
+        flexWrap: `wrap`,
         backgroundColor: theme.black,
     },
     closeIcon: {
@@ -160,15 +184,27 @@ const styles = StyleSheet.create({
     },
     row: {
         flexDirection: `row`,
-        widtH: `100%`,
-        justifyContent: `center`,
+        width: `100%`,
+        justifyContent: `flex-start`,
         alignItems: `center`,
-        margin: 20,
+        margin: 16,
     },
     text: {
         color: theme.white,
         fontSize: 16,
         marginLeft: 12,
+    },
+    buttonContainer: {
+        justifyContent: `center`,
+        margin: 0,
+        marginTop: 24,
+    },
+    saveButton: {
+        width: 200,
+        backgroundColor: theme.light,
+        padding: 10,
+        borderRadius: theme.borderRadius,
+        alignItems: `center`,
     },
     timePicker: {
         flex: 1,

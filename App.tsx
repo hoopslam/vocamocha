@@ -62,14 +62,6 @@ export default function App() {
                 <SettingsModal
                     isVisible={settings}
                     closeModal={() => setSettings(false)}
-                    randomWord={
-                        words.length
-                            ? words[Math.floor(Math.random() * words.length)]
-                                  .text
-                            : null
-                    }
-                    notificationId={localData?.notificationId}
-                    notificationTime={localData?.notificationTime}
                 />
             )}
             <Header
