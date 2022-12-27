@@ -1,57 +1,50 @@
 import { StatusBar } from 'expo-status-bar';
 import { useState, useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import Header from './components/Header';
 import AddWordModal from './components/AddWordModal';
+import SettingsModal from './components/SettingsModal';
 import theme from './theme';
 import VocabList from './components/VocabList';
 import AddWordButton from './components/AddWordButton';
 import { Word } from './types/types';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LOCAL_STORAGE_KEY } from './constants';
+import {
+    getLocalData,
+    LocalDataObject,
+    setWordsLocally,
+} from './utils/localStorage';
 
 export default function App() {
     const [words, setWords] = useState<Word[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
+    const [settings, setSettings] = useState(false);
+    const [localData, setLocalData] = useState<LocalDataObject>();
 
     const addWordHandler = async (newWord: Word) => {
-        try {
-            const jsonValue = JSON.stringify(
-                words.length ? [...words, newWord] : [newWord]
-            );
-            await AsyncStorage.setItem(LOCAL_STORAGE_KEY, jsonValue);
-            setWords((current) => [...current, newWord]);
-        } catch (e) {
-            console.error(e);
-        }
+        const newWords = [...words, newWord];
+        setWordsLocally(newWords);
+        setWords(newWords);
     };
 
     const onDeleteHandler = async (id: string) => {
         if (!words.length) return;
         const filteredWords = words.filter((word) => word.id !== id);
 
-        try {
-            await AsyncStorage.setItem(
-                LOCAL_STORAGE_KEY,
-                JSON.stringify(filteredWords)
-            );
-            setWords(filteredWords);
-        } catch (e) {
-            console.error(e);
-        }
+        setWordsLocally(filteredWords);
+        setWords(filteredWords);
     };
 
     useEffect(() => {
-        const getLocalData = async () => {
-            try {
-                const jsonValue = await AsyncStorage.getItem(LOCAL_STORAGE_KEY);
-                if (jsonValue !== null) {
-                    setWords(JSON.parse(jsonValue));
-                }
-            } catch (e) {
-                console.error(e);
+        const loadLocalData = async () => {
+            const localData = await getLocalData();
+            if (localData) {
+                setLocalData(localData);
+            }
+            if (localData?.words?.length) {
+                setWords(localData.words);
             }
         };
-        getLocalData();
+        loadLocalData();
     }, []);
 
     return (
@@ -65,9 +58,16 @@ export default function App() {
                     closeModal={() => setModalVisible(false)}
                 />
             )}
-            <View style={styles.titleContainer}>
-                <Text style={styles.title}>Voca Mocha</Text>
-            </View>
+            {settings && (
+                <SettingsModal
+                    isVisible={settings}
+                    closeModal={() => setSettings(false)}
+                />
+            )}
+            <Header
+                onPress={() => setSettings(true)}
+                onCloseSettings={() => setSettings(false)}
+            />
 
             <View style={styles.listContainer}>
                 <VocabList
@@ -87,17 +87,6 @@ const styles = StyleSheet.create({
         backgroundColor: theme.black,
         alignItems: 'center',
         justifyContent: 'flex-start',
-    },
-    titleContainer: {
-        backgroundColor: theme.green,
-        width: `100%`,
-        padding: 20,
-        flexDirection: `row`,
-        justifyContent: `space-evenly`,
-    },
-    title: {
-        color: theme.white,
-        fontSize: 20,
     },
     modalContainer: {
         position: `absolute`,
