@@ -18,7 +18,6 @@ import {
     setNotifications,
 } from '../utils/notifications';
 import {
-    createDateObject,
     deleteLocalNotification,
     getLocalData,
     setNotificationLocally,
@@ -43,7 +42,6 @@ const SettingsModal = ({ isVisible, closeModal }: Props) => {
         }
         setShowTimePicker(false);
     };
-    console.log(selectedTime);
 
     const parseMinutes = (minutes: number) => {
         if (minutes < 10) {
@@ -81,7 +79,6 @@ const SettingsModal = ({ isVisible, closeModal }: Props) => {
     useEffect(() => {
         const loadLocalNotifications = async () => {
             const localData = await getLocalData();
-            console.log(`test: ${localData?.notification}`);
             if (localData?.notification) {
                 let newDateObject = new Date();
                 newDateObject.setHours(localData.notification.hour);

@@ -13,7 +13,6 @@ export const setNotifications = async (date: Date) => {
                 minute: date.getMinutes(),
             },
         });
-        console.log(`notification set with id ${notificationId}`);
         return notificationId;
     } catch (e) {
         console.error(e);

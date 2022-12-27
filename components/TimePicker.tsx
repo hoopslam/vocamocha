@@ -20,7 +20,6 @@ const TimePicker = () => {
         setSelectedTime(time);
         hidePicker();
     };
-    console.log(selectedTime);
 
     return (
         <View style={styles.timePickerContainer}>
